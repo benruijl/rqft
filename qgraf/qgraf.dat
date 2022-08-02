@@ -1,0 +1,16 @@
+
+output = 'output.py';
+style = './orientedGraphPython.sty';
+model = './model.dat';
+
+* incoming states
+in = ghost[p1];
+
+* outgoing states
+out = ghost[p1];
+
+loops = 3;
+loop_momentum = k;
+
+options = onshell, notadpole, nosnail;
+

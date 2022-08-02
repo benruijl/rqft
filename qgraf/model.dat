@@ -1,0 +1,17 @@
+* Propagators
+  [d, dbar, - ; pdg=('1','-1')]
+  [gluon,gluon,+; pdg=('21')]
+  [ghost,ghostbar,-; pdg=('82','-82')]
+  [background,background,+,external; pdg=('210')]
+* vertices
+  [dbar,gluon,d; QCD_QED='100']
+  [ghostbar,gluon,ghost; QCD_QED='100']
+  [gluon,gluon,gluon; QCD_QED='100']
+  [gluon,gluon,gluon,gluon; QCD_QED='200']
+
+  [background,gluon,gluon; QCD_QED='100']
+  [background,gluon,gluon,gluon; QCD_QED='200']
+  [ghostbar,background,ghost; QCD_QED='100']
+  [background,gluon,ghostbar,ghost; QCD_QED='200']
+  [dbar,background,d; QCD_QED='100']
+* end
