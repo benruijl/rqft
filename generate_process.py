@@ -549,7 +549,7 @@ aGraph=%s;
             loop_momenta.append(lm)
 
         topo = ForestGenerator(edge_map_lin,
-            process_name + str(index),
+            process_name + '_' + str(index),
             ['q1', 'q2'][:num_incoming],
             loop_momenta_names=tuple([l for l,s in loop_momenta]),
             masses={},
@@ -828,10 +828,11 @@ import subprocess
 from multiprocessing import Pool
 
 def run_form(i):
-    subprocess.run(["form", "-D", "DIAG={{}}_{{}}".format("{}", i), "-D", "MAXPOLE=3", "rqft.frm"])
+    subprocess.run(["form", "-D", "DIAG={{}}_{{}}".format("{}", i), "-D", "MAXPOLE=3", "rqft.frm"], stdout=subprocess.DEVNULL)
+    print('Done with graph {{}}'.format(i))
 
 with Pool() as pool:
-    pool.map(run_form, range({} + 1))
+    pool.map(run_form, range({}))
 
     """.format(process_name, len(graphs)))
 

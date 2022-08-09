@@ -152,6 +152,10 @@ repeat id subgraph(?a,p?) = subgraph(?a);
         id tmp(m?) = t*m;
     endif;
 
+    B tmax,t,uvprop;
+    .sort:expand-prep;
+    Keep brackets;
+
 * expand the propagators without loop momentum dependence
     id uvprop(k?,t1?,0,m?) = uvprop(k,t1,1,m) * (1 - (mUVexp^2*t^2-m^2*t^2) * t1 + (mUVexp^2*t^2-m^2*t^2)^2 * t1^2 + ALARM * t^5);
     id t^x1?*tmax^x2? = t^x1*tmax^x2 * theta_(x2-x1);
@@ -170,11 +174,12 @@ repeat id subgraph(?a,p?) = subgraph(?a);
     id t = 1;
     id tmax = 1;
 
-
     if (count(ALARM, 1));
         Print "UV Taylor expansion depth exceeded.";
         exit "";
     endif;
+
+    .sort:uv-expansion;
 
 * match the denominator structure to a diagram
     id uvtopo(x?,?a) = uvtopo(x,1,?a);
@@ -202,6 +207,8 @@ repeat id subgraph(?a,p?) = subgraph(?a);
 
     Multiply replace_(vec, vec1); * consider all vectors as external
     repeat id uvprop(k1?,n?)*vec1(k1?,n1?) = uvprop(k1,n)*vec(k1,n1);
+
+    .sort:topo-match;
 
     #call TensorReduce()
 
