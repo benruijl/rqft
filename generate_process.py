@@ -831,8 +831,9 @@ def run_form(i):
     subprocess.run(["form", "-D", "DIAG={{}}_{{}}".format("{}", i), "-D", "MAXPOLE=3", "rqft.frm"], stdout=subprocess.DEVNULL)
     print('Done with graph {{}}'.format(i))
 
-with Pool() as pool:
-    pool.map(run_form, range({}))
+if __name__ == '__main__':
+    with Pool() as pool:
+        pool.map(run_form, range({}))
 
     """.format(process_name, len(graphs)))
 
