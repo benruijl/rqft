@@ -6,64 +6,64 @@ graphs=[[]]
 graphs.append(
 {
 "edges":{
-<in_loop>(<field_index>+<legs>):{
+<in_loop>(<field_index>+2*<legs>):{
     "name":"p<in_index>", 
     "PDG": [pdg],
     "type": "in",
     "momentum": "<momentum>",
-    "indices": (<field_index>+<legs>+1,),
-    "vertices": (<field_index>+<legs>+1, 
-<back><vertex_index>+<legs>)
+    "indices": (<field_index>+2*<legs>+1,),
+    "vertices": (<field_index>+2*<legs>+1, 
+<back><vertex_index>+2*<legs>)
  },
 <end>
-<back><out_loop>(<field_index>+<legs>):{
+<back><out_loop>(<field_index>+2*<legs>):{
     "name": "p<leg_index>",
     "PDG": [pdg],
     "type": "out",
     "momentum": "<momentum>",
-    "indices": (<field_index>+<legs>+1,),
-    "vertices":(<vertex_index>+<legs>, 
-<back><field_index>+<legs>+1)
+    "indices": (<field_index>+2*<legs>+1,),
+    "vertices":(<vertex_index>+2*<legs>, 
+<back><field_index>+2*<legs>+1)
  },
 <end>
-<back><propagator_loop>(<propagator_index>+<legs>):{
+<back><propagator_loop>(<propagator_index>+2*<legs>):{
     "name":"q"+str(<propagator_index>),
     "PDG": [pdg],
     "type": "virtual",
     "momentum": "<momentum>",
-    "indices": (<dual-field_index>+<legs>+1,
-<back><field_index>+<legs>+1,),
-    "vertices":(<dual-vertex_index>+<legs>,
-<back><vertex_index>+<legs>)
+    "indices": (<dual-field_index>+2*<legs>+1,
+<back><field_index>+2*<legs>+1,),
+    "vertices":(<dual-vertex_index>+2*<legs>,
+<back><vertex_index>+2*<legs>)
  },
 <end>
 <back>
 },
 "nodes": {
-<in_loop> <field_index>+<legs>+1:{
+<in_loop> <field_index>+2*<legs>+1:{
     "PDGs": ([pdg],),
     "momenta": ("<momentum>"),
-    "indices": (<field_index>+<legs>+1,),
+    "indices": (<field_index>+2*<legs>+1,),
     "vertex_id": -1,
-    "edge_ids": (<field_index>+<legs>,)
+    "edge_ids": (<field_index>+2*<legs>,)
  },
 <back>
 <end>
-<back><out_loop> <field_index>+<legs>+1:{
+<back><out_loop> <field_index>+2*<legs>+1:{
     "PDGs": ([pdg],),
     "momenta": ("<momentum>"),
-    "indices": (<field_index>+<legs>+1,),
+    "indices": (<field_index>+2*<legs>+1,),
     "vertex_id": -2,
-    "edge_ids": (<field_index>+<legs>,)
+    "edge_ids": (<field_index>+2*<legs>,)
  },
 <back>
 <end>
-<back><vertex_loop> <vertex_index>+<legs>:{
+<back><vertex_loop> <vertex_index>+2*<legs>:{
     "PDGs": (<ray_loop>[pdg],<end><back>),
     "momenta": (<ray_loop>"<momentum>",<end><back>),
-    "indices": (<ray_loop><field_index>+<legs>+1,<end><back>),
+    "indices": (<ray_loop><field_index>+2*<legs>+1,<end><back>),
     "vertex_id": 0,
-    "edge_ids": (<ray_loop><propagator_index>+<legs>,<end><back>)
+    "edge_ids": (<ray_loop><propagator_index>+2*<legs>,<end><back>)
     },
 <end><back><back>
 },

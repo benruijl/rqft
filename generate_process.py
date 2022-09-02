@@ -238,6 +238,8 @@ class FORMGraph(object):
                 return r"\!\(\*SuperscriptBox[\(e\), \(-\)]\)"
             elif pdg==22:
                 return r"\[Gamma]"
+            elif pdg==1337:
+                return r"\[Psi]"
             elif pdg in [-1,-2,-3,-4,-5,-6]:
                 return r"\!\(\*OverscriptBox[\(%s\), \(_\)]\)"%quark_names[abs(pdg)]
             else:
@@ -418,14 +420,14 @@ aGraph=%s;
         return topo_generator, edge_name_to_key, original_LMB
 
     def derive_signatures(self):
-        n_incoming = sum([1 for edge in self.edges.values() if edge['type'] == 'in'])
+        n_ext = sum([1 for edge in self.edges.values() if edge['type'] in ('in', 'out')])
         n_loops = len(self.edges) - len(self.nodes) + 1
 
         # parse momentum
         p = re.compile(r'(^|\+|-)(k|p)(\d*)')
         for edge in self.edges.values():
             parsed = [e.groups() for e in p.finditer(edge['momentum'])]
-            signature = ([0 for _ in range(n_loops)], [0 for _ in range(n_incoming)])
+            signature = ([0 for _ in range(n_loops)], [0 for _ in range(n_ext)])
             for pa in parsed:
                 if pa[1] == 'p':
                     signature[1][int(pa[2]) - 1] = 1 if pa[0] == '' or pa[0] == '+' else -1
@@ -437,8 +439,8 @@ aGraph=%s;
     def impose_signatures(self):
 
         for eid, e in self.edges.items():
-            e['momentum'] = FORMGraph.momenta_decomposition_to_string(e['signature'], set_outgoing_equal_to_incoming=False)
-            neg_mom =  FORMGraph.momenta_decomposition_to_string([[-s for s in sp] for sp in e['signature']], set_outgoing_equal_to_incoming=False)
+            e['momentum'] = FORMGraph.momenta_decomposition_to_string(e['signature'])
+            neg_mom =  FORMGraph.momenta_decomposition_to_string([[-s for s in sp] for sp in e['signature']])
             for i, vi in enumerate(e['vertices']):
                 e_index = self.nodes[vi]['edge_ids'].index(eid)
                 mom = list(self.nodes[vi]['momenta'])
@@ -446,20 +448,11 @@ aGraph=%s;
                 self.nodes[vi]['momenta'] = mom
 
     @classmethod
-    def momenta_decomposition_to_string(cls, momenta_decomposition, set_outgoing_equal_to_incoming=True, overall_sign=1, leading_sign=False):
+    def momenta_decomposition_to_string(cls, momenta_decomposition, overall_sign=1, leading_sign=False):
         """ Turns ((1,0,0,-1),(1,1)) into 'k1-k4+p1+p2'"""
 
         res = ""
         first=True
-        # The outgoing momenta are set element-wise equal to the incoming ones.
-        if set_outgoing_equal_to_incoming:
-            momenta_decomposition = [
-                momenta_decomposition[0],
-                [inp+outp for inp, outp in zip(
-                    momenta_decomposition[1][:len(momenta_decomposition[1])//2],
-                    momenta_decomposition[1][len(momenta_decomposition[1])//2:]
-                )]
-            ]
         # Fuse outgoing and incoming
         for symbol, mom_decomposition in zip(('k','p'),momenta_decomposition):
             for i_k, wgt in enumerate(mom_decomposition):
@@ -602,10 +595,10 @@ aGraph=%s;
                         continue
 
                     # also subtract the external momenta
-                    d = self.momenta_decomposition_to_string(([0] * n_loops, cut['cuts'][cmb_index]['signature'][1]), False, a, True)
+                    d = self.momenta_decomposition_to_string(([0] * n_loops, cut['cuts'][cmb_index]['signature'][1]), a, True)
                     shift += '{}c{}{}'.format(sign_prefix(-a), cmb_index + 1, d)
 
-                shift += self.momenta_decomposition_to_string(([0] * n_loops, extshift), True, -1, True)
+                shift += self.momenta_decomposition_to_string(([0] * n_loops, extshift), -1, True)
                 m = 'k{},{}{}'.format(lmb_index + cmb_offset + 1, strip_plus(mom), shift)
                 forest_to_cb.append(m)
             if len(forest_to_cb) > 0:
@@ -622,7 +615,8 @@ aGraph=%s;
 
                 # construct the vertex structure of the UV subgraph
                 uv_loop_graph = uv_subgraph['loop_topo'] # all derived graphs have the same topo
-                uv_diag_moms = ','.join(self.momenta_decomposition_to_string(lmm, False) for lmm in uv_loop_graph.loop_momentum_map)
+
+                uv_diag_moms = ','.join(self.momenta_decomposition_to_string(lmm) for lmm in uv_loop_graph.loop_momentum_map)
                 vertex_structure = []
                 subgraph_vertices = set(v for ll in uv_loop_graph.loop_lines for v in (ll.start_node, ll.end_node))
                 for v in subgraph_vertices:
@@ -634,7 +628,7 @@ aGraph=%s;
                             loop_mom_sig = ''
                             for s, lmm in zip(ll.signature, uv_loop_graph.loop_momentum_map):
                                 if s != 0:
-                                    loop_mom_sig += self.momenta_decomposition_to_string(lmm, False, s * outgoing,True)
+                                    loop_mom_sig += self.momenta_decomposition_to_string(lmm, s * outgoing,True)
                             vertex.append(strip_plus(loop_mom_sig))
                     vertex_structure.append('vxs({})'.format(','.join(vertex)))
 
@@ -644,8 +638,8 @@ aGraph=%s;
                     loop_mom_shift = ''
                     for s, lmm, lm_shift in zip(ll_sig, uv_loop_graph.loop_momentum_map, uv_loop_graph.uv_loop_lines[1]):
                         if s != 0:
-                            loop_mom_sig += self.momenta_decomposition_to_string(lmm, False, s, True)
-                            loop_mom_shift += self.momenta_decomposition_to_string(lm_shift, False, s, True)
+                            loop_mom_sig += self.momenta_decomposition_to_string(lmm, s, True)
+                            loop_mom_shift += self.momenta_decomposition_to_string(lm_shift, s, True)
 
                     # the parametric shift is given in terms of external momenta of the subgraph
                     # translate the signature and param_shift to momenta of the supergraph
@@ -673,7 +667,7 @@ aGraph=%s;
                                     ext_mom_sig = (ext_mom_sig[0] + s * sig_l, ext_mom_sig[1] + s * sig_ext)
 
                         ext_mom_sig = (([x for x in ext_mom_sig[0]]), ([x for x in ext_mom_sig[1]]))
-                        ext_mom_sig = self.momenta_decomposition_to_string(ext_mom_sig, False, 1, True)
+                        ext_mom_sig = self.momenta_decomposition_to_string(ext_mom_sig, 1, True)
 
                         for _ in range(power):
                             uv_props.append('uvprop({},t{},{},{})'.format(loop_mom_sig, i, strip_plus(loop_mom_shift + ext_mom_sig), edge_mass))
@@ -764,8 +758,8 @@ aGraph=%s;
                 topo_generator.generate_momentum_flow()
                 smap = topo_generator.get_signature_map()
                 for e_key, e in g['edges'].items():
-                    #print("\t",e['momentum'], " -> ", FORMGraph.momenta_decomposition_to_string(smap[e['name']], set_outgoing_equal_to_incoming=True))
-                    e['momentum'] = FORMGraph.momenta_decomposition_to_string(smap[e['name']], set_outgoing_equal_to_incoming=True)
+                    #print("\t",e['momentum'], " -> ", FORMGraph.momenta_decomposition_to_string(smap[e['name']]))
+                    e['momentum'] = FORMGraph.momenta_decomposition_to_string(smap[e['name']])
                     #print(m.graphs[i]['edges'][e_key])
                 for n_key, n in g['nodes'].items():
                     if n['vertex_id'] < 0:
@@ -784,7 +778,7 @@ aGraph=%s;
                         
                         signature = [sgn * x for x in smap[g['edges'][eid]['name']][0]]
                         shifts = [sgn * x for x in smap[g['edges'][eid]['name']][1]]
-                        new_moms += [FORMGraph.momenta_decomposition_to_string([signature, shifts], set_outgoing_equal_to_incoming=True)]
+                        new_moms += [FORMGraph.momenta_decomposition_to_string([signature, shifts])]
                     #print("\t\t",n['momenta'])
                     #print("\t\t",tuple(new_moms))
                     n['momenta'] = tuple(new_moms)
