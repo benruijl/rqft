@@ -71,10 +71,10 @@ Fill masses(21) = 0;
 Fill masses(22) = 0;
 Fill masses(210) = 0;
 Fill masses(25) = massh;
-Fill masses(1337) = 0;
+Fill masses(1337) = masspsi;
 
 * note: this set needs to be complete for the UV expansion
-Set allmasses: massu, massd, massc, masss, masst, massb, masse, massmu, masstau, massh, massw, massz, mUVexp;
+Set allmasses: massu, masspsi, massd, massc, masss, masst, massb, masse, massmu, masstau, massh, massw, massz, mUVexp;
 
 Fill charges(1) = -1/3; * d
 Fill charges(2) = 2/3; * u
